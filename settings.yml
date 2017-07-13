@@ -1,0 +1,9 @@
+https://example.shotgunstudio.com:
+  script_name: pi-datapoint-localinstall.py
+  script_key: 123thisisafakescriptkeyexample456
+  data_point_entity: CustomNonProjectEntity??
+  to_track:
+    - entity_type: HumanUser
+      field_to_track: sg_status_list
+      value_to_track: act
+      write_to_field: sg_num_active_human_users
