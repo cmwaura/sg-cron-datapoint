@@ -31,7 +31,7 @@ class DataPoint(object):
     and creating data point records.
     """
 
-    def __init__(self, create_data_points):
+    def __init__(self):
         """
         Defines variables to share across methods, sets up logging, Shotgun
         connections, reads settings, and runs the _create_data_points method,
@@ -40,23 +40,20 @@ class DataPoint(object):
         :param bool create_data_points: Whether or not a data point is created.
         """
 
-        # Don't do anything unless the user has asked to create a data point.
-        if create_data_points:
+        # Initialize shared variables.
+        self._sites = {}
+        self._cur_dir = os.path.dirname(os.path.abspath(__file__))
 
-            # Initialize shared variables.
-            self._sites = {}
-            self._cur_dir = os.path.dirname(os.path.abspath(__file__))
+        # Create a datestamp var for stamping logs and naming data points.
+        self._datestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H-%M-%S")
 
-            # Create a datestamp var for stamping logs and naming data points.
-            self._datestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H-%M-%S")
+        # Set up everything we need to log output.
+        self._set_up_logging()
 
-            # Set up everything we need to log output.
-            self._set_up_logging()
-
-            # Read settings, connect to sg, and create one or more data points.
-            self._read_settings()
-            self._connect_to_sg()
-            self._create_data_points()
+        # Read settings, connect to sg, and create one or more data points.
+        self._read_settings()
+        self._connect_to_sg()
+        self._create_data_points()
 
     def _set_up_logging(self):
         """
@@ -101,7 +98,7 @@ class DataPoint(object):
             except Exception, e:
                 raise ValueError("Could not parse %s: %s" % (settings_file, str(e)))
         else:
-            logging.error(
+            raise ValueError(
                 "Did not find %s. See README.md for details." % settings_file
             )
             return
@@ -115,7 +112,7 @@ class DataPoint(object):
 
     def _connect_to_sg(self):
         """
-        Adds sg handles to the sites dict and removes credentials.
+        Adds sg handles to the self._sites dict and removes credentials.
         """
 
         # Grab a Python API handle for each Shotgun Site and add it to the
@@ -123,10 +120,9 @@ class DataPoint(object):
         for site_url, credentials in self._sites.iteritems():
 
             if not credentials.get("script_name") or not credentials.get("script_key"):
-                logging.error(
+                raise ValueError(
                     "Bad or missing settings for %s in settings.yml, exiting." % site_url
                 )
-                return
 
             logging.info("Connecting to %s..." % site_url)
             credentials["sg"] = shotgun_api3.Shotgun(
@@ -217,9 +213,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "Usage: report.py --help"
 
-    # Pass our command-line arguments to the DataPoint class.
+    # Run the DataPoint class if create_data_points has been specified.
     else:
         args = vars(parser.parse_args())
-        DataPoint(
-            args["create_data_points"],
-        )
+        if args["create_data_points"]:
+            DataPoint()

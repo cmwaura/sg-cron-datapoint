@@ -50,8 +50,14 @@ Name the Script Key something like `pi-datapoint-localinstall.py`.
 
 A `CustomNonProjectEntity` needs to be nominated as the "Data Point" entity and
 enabled in Shotgun. This is the entity that will be referenced in the
-`settings.yml` file. It's also a good idea to make a global Shotgun page to view
-the Data Point entity instances.
+`settings.yml` file. If you don't know how to do that, visit this url to learn
+how to add CustomEntities (but remember to use a CustomNonProjectEntity, *not* a
+CustomEntity):
+
+https://support.shotgunsoftware.com/hc/en-us/articles/114094182834-Enabling-a-custom-entity
+
+It's also a good idea to make a global Shotgun page to view the Data Point
+entity instances.
 
 ## Settings
 
@@ -70,7 +76,17 @@ https://example.shotgunstudio.com:
       write_to_field: sg_num_active_human_users
 ```
 
-Multiple Sites can be defined:
+| Setting name      | Type | Description                                                                                    |
+| :-                | :-   | :-                                                                                             |
+| script_name       | str  | The name of the Shotgun Script key used to authenticate this script.                           |
+| script_key        | str  | The "Application Key" value of the Shotgun Script key used to authenticate this script.        |
+| data_point_entity | str  | The `CustomNonProjectEntity` used as a "Data Point," e.g, `CustomNonProjectEntity05`.          |
+| entity_type       | str  | The entity type whose field you want to track.                                                 |
+| field_to_track    | str  | The field on `entity_type` that you would like to track.                                       |
+| value_to_track    | str  | The value of `field_to_track` to track.                                                        |
+| write_to_field    | str  | The name of the field on `data_point_entity` to store the `value_to_track`. No spaces allowed. |
+
+Note that multiple Sites can be defined:
 
 ```
 https://example1.shotgunstudio.com:
@@ -121,12 +137,11 @@ Created data point: {'code': '2017_07_13_11-09-12', 'type': 'CustomNonProjectEnt
 
 You can then check your Shotgun Site's global Data Points page (that you
 created) to see the new DataPoint instance. If you used the example settings in
-this README.md file, a `sg_num_active_human_users` will be created in the
+this README.md file, a `sg_num_active_human_users` field will be created in the
 DataPoint schema and the total number of HumanUser entities with their
-`sg_status_list` field set to `act` will be recorded there. If you would like to
-track other types of data, simply add them to the `to_track` list. For example,
-if you wanted to also track the number of Versions set to Active, your settings
-would look like this:
+`sg_status_list` field set to `act` will be recorded there. If you want to track
+other types of data, simply add them to the `to_track` list. For example, if you
+want to track the number of Versions set to Active, change your settings thusly:
 
 ```
 https://example.shotgunstudio.com:
