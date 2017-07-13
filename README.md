@@ -2,8 +2,7 @@
 
 This repo contains a command-line tool that creates a data point on one or more
 Shotgun Sites. It is meant to be run on a schedule, either via crontab, or other
-process schedulers. A data point entity instance is created in Shotgun each time
-the script is run; it is possible to customize the type of data that is tracked
+process schedulers. It is possible to customize the type of data that is tracked
 and stored.
 
 ## Download
@@ -148,8 +147,8 @@ https://example.shotgunstudio.com:
 ### Scheduling
 
 Once you've tested the script and are happy with the result in Shotgun, you can
-add it to your crontab. If you've set up a virtual environment, the crontab
-entry will look something like this (this will run every night at midnight):
+add it to a crontab. If you've set up a virtual environment, the crontab entry
+will look something like this (this will run every night at midnight):
 
 ```
 0 0 * * * source /path/to/repos/pi-report-localinstall/venv/bin/activate; /path/to/repos/pi-report-localinstall/data_point.py -c; deactivate

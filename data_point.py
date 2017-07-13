@@ -21,26 +21,27 @@ import argparse
 import shotgun_api3
 
 _DESCRIPTION = "This script creates a data point in one or more Shotgun Sites \
-that stores field/value data specified by the user in a settings.yml file. See \
-README.md for more details."
+that stores field/value data specified in a settings.yml file. See README.md \
+for more details."
 
 
 class DataPoint(object):
     """
-    This class contains methods related to querying Shotgun and creating data
-    point records.
+    This class contains methods related to reading settings, querying Shotgun,
+    and creating data point records.
     """
 
-    def __init__(self, create_data_point):
+    def __init__(self, create_data_points):
         """
         Defines variables to share across methods, sets up logging, Shotgun
-        connections, and runs the _create_data_point method, if asked for.
+        connections, reads settings, and runs the _create_data_points method,
+        if asked for.
 
-        :param bool create_data_point: Whether or not a data point is created.
+        :param bool create_data_points: Whether or not a data point is created.
         """
 
         # Don't do anything unless the user has asked to create a data point.
-        if create_data_point:
+        if create_data_points:
 
             # Initialize shared variables.
             self._sites = {}
@@ -53,9 +54,9 @@ class DataPoint(object):
             self._set_up_logging()
 
             # Read settings, connect to sg, and create one or more data points.
-            self._sites = self._read_settings()
+            self._read_settings()
             self._connect_to_sg()
-            self._create_data_point()
+            self._create_data_points()
 
     def _set_up_logging(self):
         """
@@ -85,8 +86,6 @@ class DataPoint(object):
     def _read_settings(self):
         """
         Reads in and validates a settings.yml file.
-
-        :returns: dict of Shotgun Sites and related settings.
         """
 
         settings_file = os.path.join(self._cur_dir, "settings.yml")
@@ -112,7 +111,7 @@ class DataPoint(object):
             )
 
         # Return the Sites dict if everything is copasetic.
-        return sites
+        self._sites = sites
 
     def _connect_to_sg(self):
         """
@@ -140,7 +139,7 @@ class DataPoint(object):
             credentials.pop("script_name", None)
             credentials.pop("script_key", None)
 
-    def _create_data_point(self):
+    def _create_data_points(self):
         """
         Creates one data point for each Shotgun Site in the self._sites dict.
         """
@@ -208,7 +207,7 @@ if __name__ == "__main__":
     # Add arguments to the parser.
     parser.add_argument(
         "-c",
-        "--create_data_point",
+        "--create_data_points",
         help="Create a data point in Shotgun.",
         action="store_true",
         required=False,
@@ -222,5 +221,5 @@ if __name__ == "__main__":
     else:
         args = vars(parser.parse_args())
         DataPoint(
-            args["create_data_point"],
+            args["create_data_points"],
         )
