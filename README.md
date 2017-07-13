@@ -1,4 +1,4 @@
-# pi-datapoint-localinstall
+# sg-cron-datapoint
 
 This repo contains a command-line tool that creates a data point on one or more
 Shotgun Sites. The data point is customizable and can be used to track and count
@@ -9,7 +9,7 @@ field data from other Shotgun entities:
 This stored data can then be used to build graphs or reports that show trends
 over time, or simply be a historical record.
 
-`pi-datapoint-localinstall` is meant to be run on a schedule, either via
+`sg-cron-datapoint` is meant to be run on a schedule, either via
 crontab, or other process schedulers.
 
 ## Download
@@ -17,7 +17,7 @@ crontab, or other process schedulers.
 To download, clone this repo. Or, for those not familar with Git or GitHub,
 click the green `Clone or download` button on this page:
 
-https://github.com/shotgunsoftware/pi-datapoint-localinstall
+https://github.com/shotgunsoftware/sg-cron-datapoint
 
 ... choose `Download ZIP`, and unzip the package into a directory of your
 choice.
@@ -45,13 +45,13 @@ https://virtualenv.pypa.io/en/stable
 
 ## Authenticate
 
-To gain access to a Shotgun Site, `pi-datapoint-localinstall` needs to reference
+To gain access to a Shotgun Site, `sg-cron-datapoint` needs to reference
 a Script Key. Visit the following url to learn how to create a Script
 (Application) Key for your Shotgun Site:
 
 https://support.shotgunsoftware.com/hc/en-us/articles/219031368-Create-and-manage-API-Scripts
 
-Name the Script Key something like `pi-datapoint-localinstall.py`.
+Name the Script Key something like `sg-cron-datapoint.py`.
 
 ## Shotgun configuration
 
@@ -68,12 +68,12 @@ entity instances.
 
 ## Settings
 
-A `settings.yml` file must exist in the `pi-datapoint-localinstall` directory
+A `settings.yml` file must exist in the `sg-cron-datapoint` directory
 with at least one Shotgun Site and its associated settings defined, like this:
 
 ```
 https://example.shotgunstudio.com:
-  script_name: pi-datapoint-localinstall.py
+  script_name: sg-cron-datapoint.py
   script_key: 123thisisafakescriptkeyexample456
   data_point_entity: CustomNonProjectEntity??
   to_track:
@@ -97,7 +97,7 @@ Note that multiple Sites can be defined:
 
 ```
 https://example1.shotgunstudio.com:
-  script_name: pi-datapoint-localinstall.py
+  script_name: sg-cron-datapoint.py
   script_key: 123thisisafakescriptkeyexample456
   data_point_entity: CustomNonProjectEntity??
   to_track:
@@ -106,7 +106,7 @@ https://example1.shotgunstudio.com:
       value_to_track: act
       write_to_field: sg_num_active_human_users
 https://example2.shotgunstudio.com:
-  script_name: pi-datapoint-localinstall.py
+  script_name: sg-cron-datapoint.py
   script_key: 789thisisafakescriptkeyexample101
   data_point_entity: CustomNonProjectEntity??
   to_track:
@@ -119,7 +119,7 @@ https://example2.shotgunstudio.com:
 ## Usage
 
 Type `./data_point.py -h` or `./data_point.py --help` from the
-`pi-datapoint-localinstall` directory for usage details.
+`sg-cron-datapoint` directory for usage details.
 
 ## Workflow
 
@@ -152,7 +152,7 @@ want to track the number of Versions set to In Progress, change your settings th
 
 ```
 https://example.shotgunstudio.com:
-  script_name: pi-datapoint-localinstall.py
+  script_name: sg-cron-datapoint.py
   script_key: 123thisisafakescriptkeyexample456
   data_point_entity: CustomNonProjectEntity??
   to_track:
