@@ -14,8 +14,8 @@ crontab, or other process schedulers.
 
 ## Download
 
-To download, simply clone this repo. Or, for those not familar with Git or
-GitHub, click the green `Clone or download` button on this page:
+To download, clone this repo. Or, for those not familar with Git or GitHub,
+click the green `Clone or download` button on this page:
 
 https://github.com/shotgunsoftware/pi-datapoint-localinstall
 
@@ -148,7 +148,7 @@ this README.md file, a `sg_num_active_human_users` field will be created in the
 DataPoint schema and the total number of HumanUser entities with their
 `sg_status_list` field set to `act` will be recorded there. If you want to track
 other types of data, simply add them to the `to_track` list. For example, if you
-want to track the number of Versions set to Active, change your settings thusly:
+want to track the number of Versions set to In Progress, change your settings thusly:
 
 ```
 https://example.shotgunstudio.com:
@@ -162,7 +162,7 @@ https://example.shotgunstudio.com:
       write_to_field: sg_num_active_human_users
     - entity_type: Version
       field_to_track: sg_status_list
-      value_to_track: act
+      value_to_track: ip
       write_to_field: sg_num_act_versions
 ```
 
