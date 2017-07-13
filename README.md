@@ -1,9 +1,16 @@
 # pi-datapoint-localinstall
 
 This repo contains a command-line tool that creates a data point on one or more
-Shotgun Sites. It is meant to be run on a schedule, either via crontab, or other
-process schedulers. It is possible to customize the type of data that is tracked
-and stored.
+Shotgun Sites. The data point is customizable and can be used to track and count
+field data from other Shotgun entities:
+
+![](data_point.jpg?raw=true)
+
+This stored data can then be used to build graphs or reports that show trends
+over time, or simply be a historical record.
+
+`pi-datapoint-localinstall` is meant to be run on a schedule, either via
+crontab, or other process schedulers.
 
 ## Download
 
@@ -84,7 +91,7 @@ https://example.shotgunstudio.com:
 | entity_type       | str  | The entity type whose field you want to track.                                                 |
 | field_to_track    | str  | The field on `entity_type` that you would like to track.                                       |
 | value_to_track    | str  | The value of `field_to_track` to track.                                                        |
-| write_to_field    | str  | The name of the field on `data_point_entity` to store the `value_to_track`. No spaces allowed. |
+| write_to_field    | str  | The name of the field on `data_point_entity` to store the `value_to_track`. No spaces allowed. If the field doesn't already exist in the `data_point_entity` schema, it will be created. |
 
 Note that multiple Sites can be defined:
 
