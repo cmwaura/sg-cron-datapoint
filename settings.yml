@@ -1,5 +1,5 @@
 https://example.shotgunstudio.com:
-  script_name: pi-datapoint-localinstall.py
+  script_name: sg-cron-datapoint.py
   script_key: 123thisisafakescriptkeyexample456
   data_point_entity: CustomNonProjectEntity??
   to_track:
