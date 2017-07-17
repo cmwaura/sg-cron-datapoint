@@ -42,6 +42,7 @@ class DataPoint(object):
 
         # Initialize shared variables.
         self._sites = {}
+        self._batch_data = []
         self._cur_dir = os.path.dirname(os.path.abspath(__file__))
 
         # Create a datestamp var for stamping logs and naming data points.
@@ -135,60 +136,188 @@ class DataPoint(object):
             credentials.pop("script_name", None)
             credentials.pop("script_key", None)
 
+    def _prep_schema(self, entity, site_info, to_track):
+        """
+        Creates required fields on a data point entity if they don't already
+        exist.
+
+        :param str entity: A SG CustomEntity or CustomNonProjectEntity.
+        :param dict site_info: A settings dict related to one SG Site.
+        :param list to_track: A list of dicts containing info about what field
+                              data to track and where to write it to.
+        :raises: ValueError if a schema field can't be created.
+        """
+
+        # Grab the entity's schema.
+        data_point_schema = site_info["sg"].schema_field_read(entity)
+
+        # Loop through the to_track list and add any fields we find.
+        for track in to_track:
+
+            # Add the write_to_field to the entity schema if it doesn't exist.
+            if not track["write_to_field"] in data_point_schema.keys():
+                field = site_info["sg"].schema_field_create(
+                    entity,
+                    "number",
+                    track["write_to_field"].replace("sg_", ""),
+                )
+                if field != track["write_to_field"]:
+                    raise ValueError(
+                        "Attempted to create field %s on %s schema, but got %s." % (
+                            track["write_to_field"],
+                            entity,
+                            field,
+                        )
+                    )
+                else:
+                    logging.info(
+                        "Created field %s on %s." % (
+                            track["write_to_field"],
+                            entity,
+                        )
+                    )
+
+    def _add_point(self, entity, site_info, to_track, project=None):
+        """
+        Creates a data point entry in self._batch_data on an entity for each
+        item in the track list.
+
+        :param str entity: A SG CustomEntity or CustomNonProjectEntity.
+        :param dict site_info: A settings dict related to one SG Site.
+        :param list to_track: A list of dicts containing info about what field
+                              data to track and where to write it to.
+        :param dict project: A standard SG Project dict.
+        """
+
+        # Start our batch create command data dict.
+        data = {"code": self._datestamp}
+        if project:
+            data["project"] = project
+
+        # Loop through the track list and add any data points we find.
+        for track in to_track:
+
+            # Copy the filters list so we don't end up bloating it as we loop
+            # through to_track.
+            filters = list(track["filters"])
+
+            # If we've got a Project, add it to the filters list.
+            if project:
+                filters.append(["project", "is", project])
+
+            # Add exceptions to filters list for weird cases (like built-in
+            # HumanUsers).
+            if track["entity_type"] == "HumanUser":
+                filters.append(
+                    ["name", "not_in", ["Shotgun Support", "Template User"]]
+                )
+
+            # Find all entity instances that match the field/value criteria.
+            entities = site_info["sg"].find(track["entity_type"], filters)
+
+            # Count our entities and assign the number to write_to_field.
+            data[track["write_to_field"]] = len(entities)
+
+        # Add our data point to the batch command list.
+        self._batch_data.append(
+            {
+                "request_type": "create",
+                "entity_type": entity,
+                "data": data
+            }
+        )
+
     def _create_data_points(self):
         """
-        Creates one data point for each Shotgun Site in the self._sites dict.
+        Loops through the sites dict, and runs _prep_schema and _add_point
+        depending on whether global and/or project data entities are defined.
         """
 
         # Loop through each Site and create a data point.
         for site_url, site_info in self._sites.iteritems():
 
-            sg = site_info["sg"]
-            data_point_entity = site_info["data_point_entity"]
-            data_point_schema = sg.schema_field_read(data_point_entity)
-            data = {"code": self._datestamp}
-
-            # Loop through to_track list and add any data points we find.
-            for track in site_info["to_track"]:
-
-                # Add the write_to_field to the data_point_entity schema if it
-                # doesn't exist.
-                if not track["write_to_field"] in data_point_schema.keys():
-                    field = sg.schema_field_create(
-                        data_point_entity,
-                        "number",
-                        track["write_to_field"].replace("sg_", ""),
+            if not site_info.get("global_data_point_entity") and \
+                not site_info.get("project_data_point_entity"):
+                    logging.error(
+                        "No data point entities defined for %s, skipping Site." % site_url
                     )
-                    if field != track["write_to_field"]:
-                        raise ValueError(
-                            "Attempted to create field %s on %s schema, but got %s." % (
-                                track["write_to_field"],
-                                data_point_entity,
-                                field,
+                    continue
+
+            # If we've got a global_data_point_entity, prep its schema and add
+            # a data point.
+            if site_info.get("global_data_point_entity"):
+                global_data_point_entity = site_info["global_data_point_entity"]
+                self._prep_schema(
+                    global_data_point_entity,
+                    site_info,
+                    site_info["track_globally"],
+                )
+                self._add_point(
+                    global_data_point_entity,
+                    site_info,
+                    site_info["track_globally"],
+                )
+
+            # If we've got a project_data_point_entity, prep its schema, loop
+            # through all Projects, and add a data point.
+            if site_info.get("project_data_point_entity"):
+                project_data_point_entity = site_info["project_data_point_entity"]
+                self._prep_schema(
+                    project_data_point_entity,
+                    site_info,
+                    site_info["track_per_project"],
+                )
+
+                # Ignore these special Projects.
+                template_and_demo_projects = [
+                    "Template Project",
+                    "Motion Capture Template",
+                    "Motion Capture Template",
+                    "Demo: Animation",
+                    "Demo: Game",
+                    "Game Template",
+                    "Film Template",
+                    "TV Series Template",
+                    "Demo: Animation with Cuts",
+                ]
+
+                # Find all relevant Projects and add a data point for each.
+                projects = site_info["sg"].find(
+                    "Project",
+                    [
+                        ["name", "not_in", template_and_demo_projects],
+                    ],
+                    ["name"],
+                )
+                logging.info("Creating data point batch commands for all Projects...")
+                for project in projects:
+                    self._add_point(
+                        project_data_point_entity,
+                        site_info,
+                        site_info["track_per_project"],
+                        project,
+                    )
+
+            # If we've got something in self._batch_data, send it off to SG.
+            if self._batch_data:
+                logging.info("Running batch create API command...")
+                site_info["sg"].batch(self._batch_data)
+                for data_point in self._batch_data:
+                    if data_point["entity_type"] == site_info.get("project_data_point_entity"):
+                        logging.info(
+                            "Created \"%s\" data point on Project \"%s.\"" % (
+                                data_point["data"]["code"],
+                                data_point["data"]["project"]["name"],
                             )
                         )
                     else:
                         logging.info(
-                            "Created field %s on %s." % (
-                                track["write_to_field"],
-                                data_point_entity,
+                            "Created \"%s\" Global data point." % (
+                                data_point["data"]["code"],
                             )
                         )
-
-                # Find all entity instances that match the field/value criteria.
-                entities = sg.find(
-                    track["entity_type"],
-                    [
-                        [track["field_to_track"], "is", track["value_to_track"]]
-                    ]
-                )
-
-                data[track["write_to_field"]] = len(entities)
-
-            # Create our data point and tell the logger about it.
-            data_point = sg.create(data_point_entity, data)
-            logging.info("Created data point: %s" % data_point)
-
+            else:
+                logging.Error("Nothing to do!")
 
 if __name__ == "__main__":
     """
