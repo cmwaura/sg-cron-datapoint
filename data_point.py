@@ -179,8 +179,8 @@ class DataPoint(object):
 
     def _add_point(self, entity, site_info, to_track, project=None):
         """
-        Creates a data point entry in self._batch_data on an entity for each
-        item in the track list.
+        Creates a data point entry in self._batch_data for each item in the
+        to_track list.
 
         :param str entity: A SG CustomEntity or CustomNonProjectEntity.
         :param dict site_info: A settings dict related to one SG Site.
@@ -189,7 +189,7 @@ class DataPoint(object):
         :param dict project: A standard SG Project dict.
         """
 
-        # Start our batch create command data dict.
+        # Start our batch create data dict.
         data = {"code": self._datestamp}
         if project:
             data["project"] = project
@@ -215,7 +215,7 @@ class DataPoint(object):
             # Find all entity instances that match the field/value criteria.
             entities = site_info["sg"].find(track["entity_type"], filters)
 
-            # Count our entities and assign the number to write_to_field.
+            # Count our instances and assign the number to write_to_field.
             data[track["write_to_field"]] = len(entities)
 
         # Add our data point to the batch command list.
@@ -223,14 +223,14 @@ class DataPoint(object):
             {
                 "request_type": "create",
                 "entity_type": entity,
-                "data": data
+                "data": data,
             }
         )
 
     def _create_data_points(self):
         """
         Loops through the sites dict, and runs _prep_schema and _add_point
-        depending on whether global and/or project data entities are defined.
+        depending on whether global and/or Project data entities are defined.
         """
 
         # Loop through each Site and create a data point.
@@ -244,7 +244,7 @@ class DataPoint(object):
                     continue
 
             # If we've got a global_data_point_entity, prep its schema and add
-            # a data point.
+            # a data point to self._batch_data.
             if site_info.get("global_data_point_entity"):
                 global_data_point_entity = site_info["global_data_point_entity"]
                 self._prep_schema(
@@ -258,8 +258,9 @@ class DataPoint(object):
                     site_info["track_globally"],
                 )
 
-            # If we've got a project_data_point_entity, prep its schema, loop
-            # through all Projects, and add a data point.
+            # project_data_point_entity is different than the
+            # global_data_point_entity because we need to create a data point
+            # for each Project. Start off the same by prepping the schema.
             if site_info.get("project_data_point_entity"):
                 project_data_point_entity = site_info["project_data_point_entity"]
                 self._prep_schema(
@@ -289,7 +290,13 @@ class DataPoint(object):
                     ],
                     ["name"],
                 )
-                logging.info("Creating data point batch commands for all Projects...")
+
+                # Tell the logger what we're doing b/c this can be slow.
+                logging.info(
+                    "Creating data point batch commands for all Projects..."
+                )
+
+                # Add all the Project data points.
                 for project in projects:
                     self._add_point(
                         project_data_point_entity,

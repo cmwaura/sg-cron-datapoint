@@ -1,8 +1,8 @@
 # sg-cron-datapoint
 
-This repo contains a command-line tool that creates a data point on one or more
-Shotgun Sites. The data point is customizable and can be used to track and count
-field data from other Shotgun entities:
+This repo contains a command-line tool that creates data points on one or more
+Shotgun Sites. The data points are customizable and can be used to track and
+count field data from other Shotgun entities:
 
 ![](data_point.jpg?raw=true)
 
@@ -55,16 +55,27 @@ Name the Script Key something like `sg-cron-datapoint.py`.
 
 ## Shotgun configuration
 
-A `CustomNonProjectEntity` needs to be nominated as the "Data Point" entity and
-enabled in Shotgun. This is the entity that will be referenced in the
-`settings.yml` file. If you don't know how to do that, visit this url to learn
-how to add CustomEntities (but remember to use a CustomNonProjectEntity, *not* a
-CustomEntity):
+This script can create global or per Project data points, or both.
+
+### Global data points
+
+If you would like to track field data globally, a `CustomNonProjectEntity` needs
+to be nominated as the "Global Data Point" entity and enabled in Shotgun. This
+is the entity that will be referenced as `global_data_point_entity` in the
+`settings.yml` file. If you don't know how to use CustomEntities, visit this url
+(but remember to use a CustomNonProjectEntity, *not* a CustomEntity):
 
 https://support.shotgunsoftware.com/hc/en-us/articles/114094182834-Enabling-a-custom-entity
 
-It's also a good idea to make a global Shotgun page to view the Data Point
-entity instances.
+It's also a good idea to make a global Shotgun page to view the Global Data
+Point entity instances.
+
+### Per project data points
+
+Similar to creating global data points, if you would like to track field data
+per Project, a `CustomEntity` needs to be nomiated as the "Project Data Point"
+entity and enabled in Shotgun. This is the entity that will be referenced as
+`project_data_point_entity` in the `settings.yml` file.
 
 ## Settings
 
@@ -72,26 +83,30 @@ A `settings.yml` file must exist in the `sg-cron-datapoint` directory
 with at least one Shotgun Site and its associated settings defined, like this:
 
 ```
-https://example.shotgunstudio.com:
+https://example1.shotgunstudio.com:
   script_name: sg-cron-datapoint.py
   script_key: 123thisisafakescriptkeyexample456
-  data_point_entity: CustomNonProjectEntity??
-  to_track:
+  global_data_point_entity: CustomNonProjectEntity??
+  project_data_point_entity: CustomEntity??
+  track_globally:
     - entity_type: HumanUser
-      field_to_track: sg_status_list
-      value_to_track: act
+      filters: [["sg_status_list", "is", "act"]]
       write_to_field: sg_num_active_human_users
+  track_per_project:
+    - entity_type: Version
+      filters: [["sg_status_list", "is", "rev"]]
+      write_to_field: sg_num_ip_versions
 ```
 
-| Setting name      | Type | Description                                                                                    |
-| :-                | :-   | :-                                                                                             |
-| script_name       | str  | The name of the Shotgun Script key used to authenticate this script.                           |
-| script_key        | str  | The "Application Key" value of the Shotgun Script key used to authenticate this script.        |
-| data_point_entity | str  | The `CustomNonProjectEntity` used as a "Data Point," e.g, `CustomNonProjectEntity05`.          |
-| entity_type       | str  | The entity type whose field you want to track.                                                 |
-| field_to_track    | str  | The field on `entity_type` that you would like to track.                                       |
-| value_to_track    | str  | The value of `field_to_track` to track.                                                        |
-| write_to_field    | str  | The name of the field on `data_point_entity` to store the `value_to_track`. No spaces allowed. If the field doesn't already exist in the `data_point_entity` schema, it will be created. |
+| Setting name              | Type | Description                                                                                    |
+| :-                        | :-   | :-                                                                                             |
+| script_name               | str  | The name of the Shotgun Script key used to authenticate this script.                           |
+| script_key                | str  | The "Application Key" value of the Shotgun Script key used to authenticate this script.        |
+| global_data_point_entity  | str  | The `CustomNonProjectEntity` used as a "Global Data Point," e.g, `CustomNonProjectEntity02`.   |
+| project_data_point_entity | str  | The `CustomEntity` used as a "Project Data Point," e.g, `CustomEntity05`.                      |
+| entity_type               | str  | The entity type whose field you want to track.                                                 |
+| filters                   | str  | A standard filters list to be used with an `sg.find` command. See Python API docs for details. |
+| write_to_field            | str  | The name of the field on `data_point_entity` to store the `value_to_track`. No spaces allowed. If the field doesn't already exist in the `data_point_entity` schema, it will be created. |
 
 Note that multiple Sites can be defined:
 
@@ -99,20 +114,18 @@ Note that multiple Sites can be defined:
 https://example1.shotgunstudio.com:
   script_name: sg-cron-datapoint.py
   script_key: 123thisisafakescriptkeyexample456
-  data_point_entity: CustomNonProjectEntity??
-  to_track:
+  global_data_point_entity: CustomNonProjectEntity??
+  track_globally:
     - entity_type: HumanUser
-      field_to_track: sg_status_list
-      value_to_track: act
+      filters: [["sg_status_list", "is", "act"]]
       write_to_field: sg_num_active_human_users
 https://example2.shotgunstudio.com:
   script_name: sg-cron-datapoint.py
   script_key: 789thisisafakescriptkeyexample101
-  data_point_entity: CustomNonProjectEntity??
-  to_track:
+  global_data_point_entity: CustomNonProjectEntity??
+  track_globally:
     - entity_type: HumanUser
-      field_to_track: sg_status_list
-      value_to_track: act
+      filters: [["sg_status_list", "is", "act"]]
       write_to_field: sg_num_active_human_users
 ```
 
@@ -137,10 +150,14 @@ This can be done with a single command:
 Output should appear in your shell, similar to this:
 
 ```
-Reading /path/to/repos/pi-report-localinstall/settings.yml...
-Connecting to https://example.shotgunstudio.com...
-Created data point: {'code': '2017_07_13_11-09-12', 'type': 'CustomNonProjectEntity02', 'id': 36, 'sg_num_active_human_users': 5, 'sg_num_ip_versions': 73}
-```
+Reading /Users/user/Documents/dev/repos/pi-datapoint-localinstall/settings.yml...
+Connecting to https://example1.shotgunstudio.com...
+Creating data point batch commands for all Projects...
+Running batch create Shotgun command...
+Created "2017_07_17_18-04-26" Global data point.
+Created "2017_07_17_18-04-26" data point on Project "project_A."
+Created "2017_07_17_18-04-26" data point on Project "project_B."
+Created "2017_07_17_18-04-26" data point on Project "project_C."```
 
 You can then check your Shotgun Site's global Data Points page (that you
 created) to see the new DataPoint instance. If you used the example settings in
@@ -148,22 +165,23 @@ this README.md file, a `sg_num_active_human_users` field will be created in the
 DataPoint schema and the total number of HumanUser entities with their
 `sg_status_list` field set to `act` will be recorded there. If you want to track
 other types of data, simply add them to the `to_track` list. For example, if you
-want to track the number of Versions set to In Progress, change your settings thusly:
+want to also track the number of Versions set to In Progress, change your
+settings thusly:
 
 ```
 https://example.shotgunstudio.com:
   script_name: sg-cron-datapoint.py
   script_key: 123thisisafakescriptkeyexample456
-  data_point_entity: CustomNonProjectEntity??
-  to_track:
+  global_data_point_entity: CustomNonProjectEntity??
+  project_data_point_entity: CustomEntity??
+  track_globally:
     - entity_type: HumanUser
-      field_to_track: sg_status_list
-      value_to_track: act
+      filters: [["sg_status_list", "is", "act"]]
       write_to_field: sg_num_active_human_users
+  track_per_project:
     - entity_type: Version
-      field_to_track: sg_status_list
-      value_to_track: ip
-      write_to_field: sg_num_act_versions
+      filters: [["sg_status_list", "is", "ip"]]
+      write_to_field: sg_num_ip_versions
 ```
 
 ### Scheduling
