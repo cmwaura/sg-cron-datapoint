@@ -1,9 +1,8 @@
-https://example.shotgunstudio.com:
-  script_name: sg-cron-datapoint.py
+https://example1.shotgunstudio.com:
+  script_name: sg-cron-datapoint
   script_key: 123thisisafakescriptkeyexample456
-  data_point_entity: CustomNonProjectEntity??
-  to_track:
+  global_data_point_entity: CustomNonProjectEntity??
+  track_globally:
     - entity_type: HumanUser
-      field_to_track: sg_status_list
-      value_to_track: act
+      filters: [["sg_status_list", "is", "act"]]
       write_to_field: sg_num_active_human_users
