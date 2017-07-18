@@ -12,8 +12,9 @@ tracked globally:
 ![](project_data_point.jpg?raw=true)
 
 ... or both. This stored data can then be used to build graphs or reports that
-show trends over time, or can simply serve as a historical record. E.g., here is
-a quick graph created in Excel by using "Export All to Excel (csv)" command:
+show trends over time, or can simply serve as a historical record. For example,
+here is a quick graph created in Excel by using "Export All to Excel (csv)"
+command:
 
 ![](graph.jpg?raw=true)
 
