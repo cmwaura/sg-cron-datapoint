@@ -1,5 +1,5 @@
 https://example1.shotgunstudio.com:
-  script_name: sg-cron-datapoint.py
+  script_name: sg-cron-datapoint
   script_key: 123thisisafakescriptkeyexample456
   global_data_point_entity: CustomNonProjectEntity??
   track_globally:
