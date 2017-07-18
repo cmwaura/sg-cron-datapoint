@@ -282,7 +282,7 @@ class DataPoint(object):
                     "Demo: Animation with Cuts",
                 ]
 
-                # Find all relevant Projects and add a data point for each.
+                # Find all relevant Projects.
                 projects = site_info["sg"].find(
                     "Project",
                     [
@@ -296,7 +296,7 @@ class DataPoint(object):
                     "Creating data point batch commands for all Projects..."
                 )
 
-                # Add all the Project data points.
+                # Add all the Project data points to self._batch_data.
                 for project in projects:
                     self._add_point(
                         project_data_point_entity,
