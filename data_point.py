@@ -20,9 +20,9 @@ import datetime
 import argparse
 import shotgun_api3
 
-_DESCRIPTION = "This script creates a data point in one or more Shotgun Sites \
-that stores field/value data specified in a settings.yml file. See README.md \
-for more details."
+_DESCRIPTION = "This script creates data points on one or more Shotgun Sites \
+that store data related to entities specified in a settings.yml file. See \
+README.md for more details."
 
 
 class DataPoint(object):
@@ -340,7 +340,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c",
         "--create_data_points",
-        help="Create a data point in Shotgun.",
+        help="Create data points in Shotgun.",
         action="store_true",
         required=False,
     )
