@@ -12,7 +12,10 @@ tracked globally:
 ![](project_data_point.jpg?raw=true)
 
 ... or both. This stored data can then be used to build graphs or reports that
-show trends over time, or can simply serve as a historical record.
+show trends over time, or can simply serve as a historical record. E.g., here is
+a quick graph created in Excel by using "Export All to Excel (csv)" command:
+
+![](graph.jpg?raw=true)
 
 `sg-cron-datapoint` is meant to be run on a schedule, either via crontab, or
 other process schedulers.
@@ -73,8 +76,8 @@ CustomEntity):
 
 https://support.shotgunsoftware.com/hc/en-us/articles/114094182834-Enabling-a-custom-entity
 
-It's also a good idea to make a global Shotgun page to view the Global Data
-Point entity instances.
+It's also a good idea to make a global Shotgun page to view Global Data Point
+entity instances.
 
 ### Per project data points
 
