@@ -13,8 +13,8 @@ tracked globally:
 
 ... or both. This stored data can then be used to build graphs or reports that
 show trends over time, or can simply serve as a historical record. For example,
-here is a quick graph created in Excel by using "Export All to Excel (csv)"
-command:
+here is a quick graph created in Excel by using Shotgun's "Export All to Excel
+(csv)" command:
 
 ![](graph.jpg?raw=true)
 
