@@ -161,7 +161,7 @@ This can be done with a single command:
 Output should appear in your shell, similar to this:
 
 ```
-Reading /Users/user/Documents/dev/repos/pi-datapoint-localinstall/settings.yml...
+Reading /Users/user/Documents/dev/repos/sg-cron-datapoint/settings.yml...
 Connecting to https://example1.shotgunstudio.com...
 Creating data point batch commands for all Projects...
 Running batch create Shotgun command...
@@ -203,14 +203,14 @@ add it to a crontab. If you've set up a virtual environment, the crontab entry
 will look something like this (this will run every night at midnight):
 
 ```
-0 0 * * * source /path/to/repos/pi-datapoint-localinstall/venv/bin/activate; /path/to/repos/pi-datapoint-localinstall/data_point.py --create; deactivate
+0 0 * * * source /path/to/repos/sg-cron-datapoint/venv/bin/activate; /path/to/repos/sg-cron-datapoint/data_point.py --create; deactivate
 ```
 
 ... and if you've installed the python requirements directly on your system,
 it'll look something like this:
 
 ```
-0 0 * * * /path/to/repos/pi-datapoint-localinstall/data_point.py --create
+0 0 * * * /path/to/repos/sg-cron-datapoint/data_point.py --create
 ```
 
 If you'd like to run the script on a different schedule, just Google around for
