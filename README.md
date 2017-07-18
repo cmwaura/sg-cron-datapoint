@@ -164,7 +164,8 @@ Running batch create Shotgun command...
 Created "2017_07_17_18-04-26" Global data point.
 Created "2017_07_17_18-04-26" data point on Project "project_A."
 Created "2017_07_17_18-04-26" data point on Project "project_B."
-Created "2017_07_17_18-04-26" data point on Project "project_C."```
+Created "2017_07_17_18-04-26" data point on Project "project_C."
+```
 
 You can then check your Shotgun Site's Global Data Points page (that you
 created in the steps above) to see the new DataPoint instance. If you used the
