@@ -145,7 +145,8 @@ class DataPoint(object):
         :param dict site_info: A settings dict related to one SG Site.
         :param list to_track: A list of dicts containing info about what field
                               data to track and where to write it to.
-        :raises: ValueError if a schema field can't be created.
+        :raises: ValueError if a schema field can't be created or doesn't match
+                 what's expected.
         """
 
         # Grab the entity's schema.
@@ -269,24 +270,12 @@ class DataPoint(object):
                     site_info["track_per_project"],
                 )
 
-                # Ignore these special Projects.
-                template_and_demo_projects = [
-                    "Template Project",
-                    "Motion Capture Template",
-                    "Motion Capture Template",
-                    "Demo: Animation",
-                    "Demo: Game",
-                    "Game Template",
-                    "Film Template",
-                    "TV Series Template",
-                    "Demo: Animation with Cuts",
-                ]
-
-                # Find all relevant Projects.
+                # Find all Projects that are not templates or demos.
                 projects = site_info["sg"].find(
                     "Project",
                     [
-                        ["name", "not_in", template_and_demo_projects],
+                        ["is_demo", "is", False],
+                        ["is_template", "is", False],
                     ],
                     ["name"],
                 )
